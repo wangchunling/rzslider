@@ -1,0 +1,317 @@
+<!doctype html>
+<html lang="en" ng-app="airSlider">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <link href="bower_components/angular-wangchunling/index.css" rel="stylesheet">
+  <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+  <style>
+
+    body {
+      margin: 0px;
+    }
+    .rzslider-container-wrap {
+      position: relative;
+    }
+
+    .rzslider-container-btn {
+      position: absolute;
+      left: 62px;
+      top: 155px;
+      width: 70px;
+    }
+
+    .rzslider-container-btn .button {
+      text-align: center;
+      border-radius: 8px;
+      border: 1px solid #00B0EB;
+      font-size: 12px;
+      color: #00B0EB;
+      padding: 0;
+      background: #fff;
+    }
+
+    .rzslider-container-btn .button:disabled {
+      border: none;
+      background: #d2d2d2;
+      color: #fff;
+    }
+
+    .rzslider-container-svg {
+      -webkit-touch-callout: none;
+      -webkit-user-select: none;
+      -khtml-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+    }
+  </style>
+  <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+  <title>Document v1.1</title>
+</head>
+<body ng-controller="MainCtrl">
+<div>
+  <div id="all">
+    <div class="headCard">
+      <section class="headBar">
+        <div class="locationBox">
+          <a class="localBtn">
+            <!--ng-click="setDevice()"-->
+            <span class="area"> <!--ng-show="city"--><!--北京--></span>
+            <span class="detect">
+                            <!--ng-show="positionName"--><!--东直门-->
+                        </span>
+          </a>
+          <!--<h1 class="localName" ng-bind="detail.name"></h1>ng-bind="detail.name"-->
+          <a ng-click="goRefresh()" ng-class=" {'refresh spin': manualRefreshButtonStyle,'refresh' : !manualRefreshButtonStyle}"></a>
+        </div>
+        <div class="logoBox">
+          <img class="logo" src="imgs/airburg_logo.png" />
+        </div>
+        <!--<a class="sleep" ng-click="sleepDevice()"></a>-->
+      </section>
+      <section class="actionBar">
+        <a ng-click="sleepDevice()" class="deviceStatus">  </a>
+        <a ng-click="setLogo();getPicture()" class="shareBtn"></a>
+      </section>
+      <section class="statusBar">
+        <div class="statusTop">
+          <p class="date"></p>
+          <div class="ano">
+            <span></span>
+            <div class="levelBox">
+              <div class="levelContent">
+                <i>AQI</i>
+                <div class="aqiBox">
+                  <p class="aqi {{opacity}} "></p>
+                  <!--ng-show="city && level1"-->
+                  <p class="aqi" ng-show="!level1 && city"></p>
+                  <!--<a class="refresh spin" ng-show="!city"></a>-->
+                </div>
+              </div>
+            </div>
+          </div>
+          <!--<a class="refresh spin" ng-show="!pm1"></a>
+          <p class="anoPM">ug/m³</p>-->
+        </div>
+        <div class="statusDataBox">
+          <ul class="statusData">
+            <li class="dataPM2"><p>PM2.5<span> ug/m³</span></p></li>
+            <li class="dataPM10"><p>PM10<span> ug/m³</span></p></li>
+            <li class="dataO3"><p>O<sub>3</sub><span> ug/m³</span></p></li>
+          </ul>
+          <div class="headQrBox"> <img src="{{QRCodeUrl}}" /></div>
+        </div>
+
+      </section>
+    </div>
+    <!-- Content -->
+
+    <div class="container" id="shortCut">
+      <section class="deviceCard detailCard" ng-click="goToDetail(card)" ng-dblclick="goToDetailDB(card)">
+        <div class="deviceTop">
+          <div class="deviceInfo">
+            <p class="placeName">
+              <span class="deviceType"></span>
+            </p>
+            <div class="dataItems">
+              <span class="item humidity"></span>
+              <span class="item co2">ppm</span>
+              <span class="indoorLevel {{co2TextStyle}}"></span>
+            </div>
+          </div>
+
+          <div class="deviceAnoBox">
+            <div class="deviceAno">
+
+              <div class="deviceUnitBox">
+                <p class="aqi {{opacityPm25}}"><i></i></p>
+                <span>ug/m³</span>
+              </div>
+            </div>
+
+            <div class="refresh spin" ng-click="refreshPageById($event,card)" ng-show="!card.info&& !card.info.error&& !card.stop"></div>
+          </div>
+        </div>
+        <div class=deviceBottom>
+
+          <p class="dataItems">
+            <span class="item fan"></span>
+            <span class="item warm" ng-class="card.pctIsOn"></span>
+          </p>
+        </div>
+        <div class="deviceFooter" ng-show="deviceFliterExpiry">
+          <!--ng-show="showShareInfoScreenshot"-->
+
+          <div class="devicePeriod">
+            <p> </p>
+            <p class="periodTips"> </p>
+          </div>
+          <div class="deviceActionBox">
+            <a ng-click="goAirConsultant()"><span class="icon-service"></span> ></a>
+          </div>
+        </div>
+        <div class="deviceFooter" ng-show="deviceServiceExpiringDate">
+          <div class="devicePeriod">
+            <p></p>
+            <p class="periodTips  {{deviceServiceExpiringDateStyle}} "></p>
+          </div>
+          <div class="deviceActionBox">
+            <!--<a href="#"><span class="icon-calender"></span>滤网服务 ></a>-->
+            <a ng-click="goAirConsultant()"><span class="icon-service"></span></a>
+          </div>
+        </div>
+      </section>
+      <section class="modalSettings"  ng-show="userType!=2">
+        <div class="sectionTlt">
+          <p> </p>
+        </div>
+        <div class="sectionContent settingsContent">
+          <div class="windSettings">
+            <div class="rzslider-container-wrap">
+              <airaslider rz-slider-model="slider.minValue"
+                        rz-slider-high="slider.maxValue"
+                        disabled="buttonDisabled"
+                        rz-slider-options="slider.options">
+              </airaslider>
+              <div class="rzslider-container-btn">
+                <button class="button"
+                        ng-disabled="buttonDisabled"
+                        ng-click="SetDeivecSpeed('1')">
+
+                </button>
+              </div>
+            </div>
+          </div>
+          <ul class="modalBtns">
+            <li>
+              <button class="button"
+                      ng-class=" {'subDisabled': buttonDisabled, 'unSelected':unAvailableFanControlButton || !(buttonState=='wisdom')}" ng-disabled="buttonDisabled || unAvailableFanControlButton"
+                      ng-click="SetDeivecSpeed('0')">
+
+              </button>
+              <p></p>
+            </li>
+            <li>
+              <button class="button"
+                      ng-class=" {'subDisabled': buttonDisabled, 'unSelected':unAvailableFanControlButton || !(buttonState=='veryClean')}" ng-disabled="buttonDisabled|| unAvailableFanControlButton"
+                      ng-click="SetDeivecSpeed('3')">
+
+              </button>
+              <p></p>
+            </li>
+            <li>
+              <button class="button"
+                      ng-class=" {'subDisabled': buttonDisabled ,'unSelected':unAvailableFanControlButton || !(buttonState=='customCruise')}" ng-disabled="buttonDisabled|| unAvailableFanControlButton"
+              >
+
+              </button>
+              <p></p>
+            </li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="airWeekCompare">
+        <div class="sectionTlt">
+          <p></p>
+          <div class="chartAnnotation">
+            <span class="indoor"></span><span class="outdoor"></span>
+          </div>
+        </div>
+        <div class="sectionContent">
+          <div class="barChart">
+
+            <canvas id='ca'></canvas>
+            <!--<chart data="{{data}}"></chart>-->
+          </div>
+          <p class="airDataSource"></p>
+        </div>
+      </section>
+
+      <section class="switchBox" ng-show="userType!=2">
+        <div class="sectionTlt">
+          <p></p>
+        </div>
+        <div class="sectionContent">
+          <ul class="switchBtns">
+            <li>
+              <button class="button closed" ng-show="!ledIsAuto && showNewCleaner" ng-class=" {'subDisabled': buttonDisabled}" ng-disabled="buttonDisabled" ng-click="OpenCloseLED('0')">
+
+              </button>
+
+              <button class="button" ng-show="ledIsAuto && showNewCleaner" ng-class=" {'subDisabled': buttonDisabled}" ng-disabled="buttonDisabled" ng-click="OpenCloseLED('1')">
+
+              </button>
+            </li>
+
+            <li>
+              <button class="button closed" ng-show="ptcIsOpen && showNewCleaner" ng-class=" {'subDisabled': buttonDisabled||deviceIsOpen}"
+                      ng-disabled="buttonDisabled||deviceIsOpen" ng-click="OpenClosePtc('1')"></button>
+              <button class="button" ng-show="!ptcIsOpen && showNewCleaner" ng-class=" {'subDisabled': buttonDisabled||deviceIsOpen}"
+                      ng-disabled="buttonDisabled||deviceIsOpen" ng-click="OpenClosePtc('0')"></button>
+
+            </li>
+            <li>
+              <button class="button closed" ng-click="openDevice()" ng-show="deviceIsOpen" ng-class=" {'subDisabled': buttonDisabled}"
+                      ng-disabled="buttonDisabled"></button>
+              <button class="button " ng-click="closeDevice()" ng-show="!deviceIsOpen" ng-class=" {'subDisabled': buttonDisabled}"
+                      ng-disabled="buttonDisabled"></button>
+            </li>
+          </ul>
+        </div>
+      </section>
+    </div>
+  </div>
+
+
+  <div class="shareTips" ng-show="isShowShareTips">
+    <span class="arrowTop"></span>
+  </div>
+
+</div>
+
+<!--<div class="rzslider-container-wrap">-->
+<!--<rzslider rz-slider-model="slider.minValue"-->
+<!--rz-slider-high="slider.maxValue"-->
+<!--disabled="slider.controlDisabled"-->
+<!--rz-slider-options="slider.options">-->
+<!--</rzslider>-->
+<!--<div class="rzslider-container-btn" ng-click="init()">点击生效</div>-->
+<!--</div>-->
+</body>
+
+<script src="./lib/angular.js"></script>
+<script src="./lib/airaslider.js"></script>
+<script>
+  var getPic = function () {
+
+    html2canvas(document.getElementById("all"), { scale: 4, allowTaint: true, taintTest: false }).
+    then(function (canvas) {
+
+      var context = canvas.getContext('2d');
+      var data = canvas.toDataURL();
+      console.log(data)
+    });
+  };
+  var app = angular.module('airSlider', ['airsliderModule'])
+  app.controller('MainCtrl', function($scope) {
+    //Minimal slider config
+    $scope.SetDeivecSpeed = function() {
+      getPic()
+    }
+    $scope.slider = {
+      drawSvg: false,
+      controlDisabled: false, // 不可选
+      minValue: 60, //最小
+      maxValue: 300, // 最大
+      options: {
+        step: 1, //步长
+        noSwitching: true, // ?
+        stepArray: [40, 47, 53, 60, 67, 73, 80, 87, 93, 100, 107, 113, 120, 127, 133, 140, 147, 153, 160, 167, 173, 180, 187, 193, 200, 207, 213, 220, 227, 233, 240, 247, 253, 260, 267, 273, 280, 287, 293, 300] //步长数组
+      }
+    };
+  })
+</script>
+</html>
